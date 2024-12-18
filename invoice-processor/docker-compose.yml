@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: invoice-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: invoice_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - invoice-network
+
+  app:
+    build: .
+    container_name: invoice-app
+    depends_on:
+      - mysql
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/invoice_db?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    volumes:
+      - ./uploads:/app/uploads
+      - ./processed:/app/processed
+      - ./temp:/app/temp
+      - ./duplicate:/app/duplicate
+      - ./reports:/app/reports
+    networks:
+      - invoice-network
+
+volumes:
+  mysql-data:
+
+networks:
+  invoice-network:
+    driver: bridge 
